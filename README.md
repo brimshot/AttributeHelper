@@ -8,18 +8,6 @@ You can also bulk execute all methods on a class that match a given list of attr
 
 The same functionality from the static `AttributeHelper` class is also provided as a class trait named `HasAttribute`
 
-## Installation
-
-Install with Composer:
-
-```
-composer require attributehelper
-```
-
-Or download from GitHub:
-
-https://github.com/brimshot/AttributeHelper
-
 ## Usage
 
 `AttributeHelper` is a static class. It cannot be instantiated and all methods are static.
