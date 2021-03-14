@@ -1,0 +1,16 @@
+{
+    "name": "brimshot/attributehelper",
+    "description": "A utility for working with attributes in PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Brim",
+            "email": "chris.brim@protonmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"brimshot\\attributehelper\\": "src/"}
+    },
+    "require": {}
+}
