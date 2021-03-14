@@ -8,14 +8,6 @@ You can also bulk execute all methods on a class that match a given list of attr
 
 The same functionality from the static `AttributeHelper` class is also provided as a class trait named `HasAttribute`
 
-## Usage
-
-`AttributeHelper` is a static class. It cannot be instantiated and all methods are static.
-
-When passing in attribute names as arguments, names for attributes that resolve to classes should be given in form of a qualified class name i.e. 'namespace\path\to\MyAttribute' or *MyAttribute::class*
-
-Names for attributes that do not resolve to a class are just strings.
-
 ### Method list
 
 ```php
