@@ -60,8 +60,6 @@ final class AttributeHelperTest extends TestCase
     {
         $this->assertTrue(AttributeHelper::hasAttributeCallback(MockClass::class, DummySmartAttribute::class, fn($attr)=>$attr->aTrue()));
 
-        $this->assertTrue(AttributeHelper::hasAttributeCallback(MockClass::class, DummyParentAttribute::class, fn($attr)=>$attr->aTrue()), 'hasAttributeCallback should match attribute children by default');
-
         $this->assertFalse(AttributeHelper::hasAttributeCallback(MockClass::class, DummySmartAttribute::class, fn($attr)=>$attr->bTrue()));
     }
 

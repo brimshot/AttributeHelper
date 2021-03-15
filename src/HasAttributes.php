@@ -61,7 +61,7 @@ trait HasAttributes {
         return AttributeHelper::hasAllOfTheseAttributes($this, $attributes, $matchAttributeChildren);
     }
 
-    final public function hasExactlyTheseAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
+    final public function hasExactlyTheseAttributes(array $attributes) : bool
     {
         return AttributeHelper::hasExactlyTheseAttributes($this, $attributes);
     }

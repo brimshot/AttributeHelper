@@ -1,12 +1,13 @@
 # AttributeHelper
 
-*AttributeHelper* is a utility class for working with attributes in PHP 8.
+*AttributeHelper* is a utility for working with attributes in PHP 8.
+
+This package contains both the static `AttributeHelper` class and a class trait named `HasAttribute` that allows you to add the functionality to your classes as class methods.
 
 The helper methods allow you to quickly access information about what attributes a class, method or parameter has, including filtering via callback, and retrieve instances of those attributes.
 
 You can also bulk execute all methods on a class that match a given list of attributes. This type of meta-programming can help create projects that are open to future extension without the need to alter existing code.
 
-This package contains both a static `AttributeHelper` class and a class trait that provides the same functionality in a class method context named `HasAttribute`
 
 ## Installation
 
@@ -23,11 +24,11 @@ https://github.com/brimshot/AttributeHelper
 
 `AttributeHelper` is a static class. It cannot be instantiated and all methods are static.
 
-In the below methods, the *$item* provided as the first argument can be either a class, a class method, a class constant or a function. Class methods and constants are identified by passing in an array with the first value being the class name and the second value being the name of the method or constant i.e. `[$className, $methodName]`
+In the below methods, the *$item* provided as the first argument can be either a class, a class method, a class constant or a function. Class methods and constants are identified by passing in an array with the first value being the class name and the second value being the name of the method or constant i.e. `['<class name>', '<method name>']` or `['<class name>', '<constant name>']`
 
 When passing in attribute names as arguments, names for attributes that resolve to classes should be given in form of a qualified class name i.e. 'namespace\path\to\MyAttribute' or *MyAttribute::class*
 
-Names for attributes that do not resolve to a class should be passed as simple strings.
+Names for attributes that do not resolve to a class can be passed as simple strings.
 
 ### Method list
 
@@ -55,27 +56,27 @@ AttributeHelper::getAttributeInstancesCallback(mixed $item, callable $callback) 
 
 ```php
 // Returns the names of methods on the provided class that have the attributes in the provided list
-AttributeHelper::getClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList) : array
+AttributeHelper::getClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, $matchAttributeChildren = true) : array
 ```
 
 ```php
 // Returns true / false whether an item has a given attribute
-AttributeHelper::hasAttribute(mixed $item, string $attribute) : bool
+AttributeHelper::hasAttribute(mixed $item, string $attribute, bool $matchAttributeChildren = true) : bool
 ```
 
 ```php
-// Returns true / false whether an item has a given attribute and that the provided callback function returns when passed the matched attribute
+// Returns true / false whether an item has a given attribute and that the provided callback function returns true when passed the matched attribute
 AttributeHelper::hasAttributeCallback(mixed $item, object|string $attribute, callable $callback) : bool
 ```
 
 ```php
-// Returns true / false whether an item has all of the attributes in the provided list
-AttributeHelper::hasAllOfTheseAttributes(mixed $item, array $attributesList) : bool
+// Returns true / false whether an item has one of the attributes in the provided list
+AttributeHelper::hasOneOfTheseAttributes(mixed $item, array $attributesList, $matchAttributeChildren = true) : bool
 ```
 
 ```php
-// Returns true / false whether an item has one of the attributes in the provided list
-AttributeHelper::hasOneOfTheseAttributes(mixed $item, array $attributesList) : bool
+// Returns true / false whether an item has all of the attributes in the provided list
+AttributeHelper::hasAllOfTheseAttributes(mixed $item, array $attributesList, $matchAttributeChildren = true) : bool
 ```
 
 ```php
@@ -85,23 +86,23 @@ AttributeHelper::hasExactlyTheseAttributes(mixed $item, array $attributesList) :
 
 ```php
 // Returns true when the given item does not have any of the attributes in the provided list.
-AttributeHelper::doesNotHaveTheseAttributes(mixed $item, array $attributesList) : bool
+AttributeHelper::doesNotHaveTheseAttributes(mixed $item, array $attributesList, $matchAttributeChildren = true) : bool
 ```
 
 ```php
 // Returns true when the given class contains methods which have the attributes in the provided list.
-AttributeHelper::classHasMethodsWithAttributes(object|string $objectOrClass, array $attributesList) : bool
+AttributeHelper::classHasMethodsWithAttributes(object|string $objectOrClass, array $attributesList, $matchAttributeChildren = true) : bool
 ```
 
 ```php
 // Sequentially calls all methods on a given object that have the attributes in the provided list.
 // Returns an array, indexed by method name, with the result of each method called.
-AttributeHelper::callClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, array $methodArguments = array()) : array
+AttributeHelper::callClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, array $methodArguments = array(), $matchAttributeChildren = true) : array
 ```
 
 ## HasAttributes trait
 
-The *HasAttribute* trait allows you to use the functions as methods on an object.
+The `HasAttributes` trait allows you to use the helper functions as class methods on your objects.
 
 ### Example of using the trait:
 ``` php
@@ -138,11 +139,11 @@ getAttributeInstancesCallback(callable $callback) : array
 ```
 
 ```php
-getMethodsWithAttributes(array $attributes) : array
+getMethodsWithAttributes(array $attributes, $matchAttributeChildren = true) : array
 ```
 
 ```php
-hasAttribute(string $attribute) : bool
+hasAttribute(string $attribute, $matchAttributeChildren = true) : bool
 ```
 
 ```php
@@ -150,11 +151,11 @@ hasAttributeCallback(string $attribute, callable $callback) : bool
 ```
 
 ```php
-hasOneOfTheseAttributes(array $attributes) : bool
+hasOneOfTheseAttributes(array $attributes, $matchAttributeChildren = true) : bool
 ```
 
 ```php
-hasAllOfTheseAttributes(array $attributes) : bool
+hasAllOfTheseAttributes(array $attributes, $matchAttributeChildren = true) : bool
 ```
 
 ```php
@@ -162,15 +163,15 @@ hasExactlyTheseAttributes(array $attributes) : bool
 ```
 
 ```php
-doesNotHaveTheseAttributes(array $attributes) : bool
+doesNotHaveTheseAttributes(array $attributes, $matchAttributeChildren = true) : bool
 ```
 
 ```php
-hasMethodsWithAttributes(array $attributes) : bool
+hasMethodsWithAttributes(array $attributes, $matchAttributeChildren = true) : bool
 ```
 
 ```php
-callMethodsWithAttributes(array $attributes, array $methodArgs = array()) : array
+callMethodsWithAttributes(array $attributes, array $methodArgs = array(), $matchAttributeChildren = true) : array
 ```
 
 

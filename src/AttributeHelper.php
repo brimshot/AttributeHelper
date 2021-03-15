@@ -111,16 +111,16 @@ final class AttributeHelper {
     }
 
     /**
-     * Returns true / false whether an item has a given attribute and that the provided callback function returns when passed the matched attribute
+     * Returns true / false whether an item has a given attribute and that the provided callback function returns true when passed the matched attribute
      *
      * @param mixed $item
      * @param object|string $attribute
      * @param callable $callback
      * @return bool
      */
-    public static function hasAttributeCallback(mixed $item, object|string $attribute, callable $callback, bool $matchAttributeChildren = true) : bool
+    public static function hasAttributeCallback(mixed $item, object|string $attribute, callable $callback) : bool
     {
-        if(self::hasAttribute($item, $attribute, $matchAttributeChildren))
+        if(self::hasAttribute($item, $attribute, false))
             return (!! $callback(self::getAttributeInstance($item, $attribute)));
 
         return false;
