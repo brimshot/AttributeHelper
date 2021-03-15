@@ -4,9 +4,9 @@
 
 The helper methods allow you to quickly access information about what attributes a class, method or parameter has, including filtering via callback, and retrieve instances of those attributes.
 
-You can also bulk execute all methods on a class that match a given list of attributes. This type of meta-programming can sometimes help create projects that are open to future extension without the need to alter existing code.
+You can also bulk execute all methods on a class that match a given list of attributes. This type of meta-programming can help create projects that are open to future extension without the need to alter existing code.
 
-The same functionality from the static `AttributeHelper` class is also provided as a class trait named `HasAttribute`
+This package contains both a static `AttributeHelper` class and a class trait that provides the same functionality in a class method context named `HasAttribute`
 
 ## Installation
 
@@ -25,7 +25,7 @@ https://github.com/brimshot/AttributeHelper
 
 When passing in attribute names as arguments, names for attributes that resolve to classes should be given in form of a qualified class name i.e. 'namespace\path\to\MyAttribute' or *MyAttribute::class*
 
-Names for attributes that do not resolve to a class are just strings.
+Names for attributes that do not resolve to a class should be passed as simple strings.
 
 ### Method list
 
