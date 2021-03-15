@@ -36,7 +36,7 @@ final class AttributeHelper {
         foreach((self::reflectorFactory($item))->getAttributes() as $a) {
             if($a->getName() === $attribute) {
                 if(! $index)
-                    return self::newAttributeInstance($a);
+                    return self::safeNewInstance($a);
                 $index--;
             }
         }
@@ -52,7 +52,7 @@ final class AttributeHelper {
      */
     public static function getAttributeInstances(mixed $item) : array
     {
-        return array_filter(array_map(fn($a) => self::newAttributeInstance($a), self::reflectorFactory($item)->getAttributes()), fn($a)=> !is_null($a));
+        return array_filter(array_map(fn($a) => self::safeNewInstance($a), self::reflectorFactory($item)->getAttributes()), fn($a)=> !is_null($a));
     }
 
     /**
@@ -74,7 +74,7 @@ final class AttributeHelper {
      * @param array $attributesList
      * @return array
      */
-    public static function getClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList) : array
+    public static function getClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, $matchAttributeChildren = true) : array
     {
         if(! is_object($objectOrClass)) {
             if(! class_exists($objectOrClass))
@@ -84,7 +84,7 @@ final class AttributeHelper {
         $methods = [];
         foreach(get_class_methods($objectOrClass) as $methodName)
         {
-            if(self::hasAllOfTheseAttributes([$objectOrClass, $methodName], $attributesList))
+            if(self::hasAllOfTheseAttributes([$objectOrClass, $methodName], $attributesList, $matchAttributeChildren))
                 $methods[] = $methodName;
         }
 
@@ -102,9 +102,12 @@ final class AttributeHelper {
      * @param string $attribute
      * @return bool
      */
-    public static function hasAttribute(mixed $item, string $attribute) : bool
+    public static function hasAttribute(mixed $item, string $attribute, $matchAttributeChildren = true) : bool
     {
-        return in_array($attribute, self::getAttributes($item));
+        if(class_exists($attribute))
+            return (!! (self::reflectorFactory($item))->getAttributes($attribute, ($matchAttributeChildren? \ReflectionAttribute::IS_INSTANCEOF:0)));
+
+        return (!! (self::reflectorFactory($item))->getAttributes($attribute));
     }
 
     /**
@@ -115,9 +118,9 @@ final class AttributeHelper {
      * @param callable $callback
      * @return bool
      */
-    public static function hasAttributeCallback(mixed $item, object|string $attribute, callable $callback) : bool
+    public static function hasAttributeCallback(mixed $item, object|string $attribute, callable $callback, bool $matchAttributeChildren = true) : bool
     {
-        if(self::hasAttribute($item, $attribute))
+        if(self::hasAttribute($item, $attribute, $matchAttributeChildren))
             return (!! $callback(self::getAttributeInstance($item, $attribute)));
 
         return false;
@@ -130,9 +133,9 @@ final class AttributeHelper {
      * @param array $attributesList
      * @return bool
      */
-    public static function hasOneOfTheseAttributes(mixed $item, array $attributesList) : bool
+    public static function hasOneOfTheseAttributes(mixed $item, array $attributesList, bool $matchAttributeChildren = true) : bool
     {
-        return (! empty(array_intersect($attributesList, self::getAttributes($item))));
+        return (! empty(array_filter($attributesList, function ($a) use ($item, $matchAttributeChildren) { return self::hasAttribute($item, $a, $matchAttributeChildren); })));
     }
 
     /**
@@ -142,9 +145,9 @@ final class AttributeHelper {
      * @param array $attributesList
      * @return bool
      */
-    public static function hasAllOfTheseAttributes(mixed $item, array $attributesList) : bool
+    public static function hasAllOfTheseAttributes(mixed $item, array $attributesList, bool $matchAttributeChildren = true) : bool
     {
-        $matchingAttributes = array_intersect(self::getAttributes($item), $attributesList);
+        $matchingAttributes = array_filter($attributesList, function ($a) use ($item, $matchAttributeChildren) { return self::hasAttribute($item, $a, $matchAttributeChildren); });
         return count($matchingAttributes) && empty(array_diff($attributesList, $matchingAttributes));
     }
 
@@ -158,6 +161,7 @@ final class AttributeHelper {
     public static function hasExactlyTheseAttributes(mixed $item, array $attributesList) : bool
     {
         $itemAttributes = array_unique(self::getAttributes($item));
+        $attributesList = array_unique($attributesList);
         return (count($itemAttributes) == count($attributesList)) && empty(array_diff($attributesList, $itemAttributes));
     }
 
@@ -168,9 +172,9 @@ final class AttributeHelper {
      * @param array $attributesList
      * @return bool
      */
-    public static function doesNotHaveTheseAttributes(mixed $item, array $attributesList) : bool
+    public static function doesNotHaveTheseAttributes(mixed $item, array $attributesList, bool $matchAttributeChildren = true) : bool
     {
-        return empty(array_intersect($attributesList, self::getAttributes($item)));
+        return empty(array_filter($attributesList, function ($a) use ($item, $matchAttributeChildren) { return self::hasAttribute($item, $a, $matchAttributeChildren); }));
     }
 
     /**
@@ -180,7 +184,7 @@ final class AttributeHelper {
      * @param array $attributesList
      * @return bool
      */
-    public static function classHasMethodsWithAttributes(object|string $objectOrClass, array $attributesList) : bool
+    public static function classHasMethodsWithAttributes(object|string $objectOrClass, array $attributesList, bool $matchAttributeChildren = true) : bool
     {
         if(! is_object($objectOrClass)) {
             if(! class_exists($objectOrClass))
@@ -189,7 +193,7 @@ final class AttributeHelper {
 
         foreach(get_class_methods($objectOrClass) as $methodName)
         {
-            if(self::hasAllOfTheseAttributes([$objectOrClass, $methodName], $attributesList))
+            if(self::hasAllOfTheseAttributes([$objectOrClass, $methodName], $attributesList, $matchAttributeChildren))
                 return true;
         }
 
@@ -208,9 +212,9 @@ final class AttributeHelper {
      * @param array $methodArguments
      * @return array
      */
-    public static function callClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, array $methodArguments = array())
+    public static function callClassMethodsWithAttributes(object|string $objectOrClass, array $attributesList, array $methodArguments = array(), bool $matchAttributeChildren = true)
     {
-        $methods = self::getClassMethodsWithAttributes($objectOrClass, $attributesList);
+        $methods = self::getClassMethodsWithAttributes($objectOrClass, $attributesList, $matchAttributeChildren);
 
         $res = [];
         foreach($methods as $method) {
@@ -263,7 +267,7 @@ final class AttributeHelper {
      * @param \ReflectionAttribute $a
      * @return object|null
      */
-    private static function newAttributeInstance(\ReflectionAttribute $a) : ?object
+    private static function safeNewInstance(\ReflectionAttribute $a) : ?object
     {
         return class_exists($a->getName())? $a->newInstance():null;
     }

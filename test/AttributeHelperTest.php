@@ -9,6 +9,7 @@ use brimshot\attributehelper\test\doubles\attributes\DummyAttribute;
 use brimshot\attributehelper\test\doubles\attributes\AnotherDummyAttribute;
 use brimshot\attributehelper\test\doubles\attributes\ThirdDummyAttribute;
 use brimshot\attributehelper\test\doubles\attributes\DummySmartAttribute;
+use brimshot\attributehelper\test\doubles\attributes\DummyParentAttribute;
 
 #[DummyAttribute]
 function dummyFunction() : void
@@ -59,6 +60,8 @@ final class AttributeHelperTest extends TestCase
     {
         $this->assertTrue(AttributeHelper::hasAttributeCallback(MockClass::class, DummySmartAttribute::class, fn($attr)=>$attr->aTrue()));
 
+        $this->assertTrue(AttributeHelper::hasAttributeCallback(MockClass::class, DummyParentAttribute::class, fn($attr)=>$attr->aTrue()), 'hasAttributeCallback should match attribute children by default');
+
         $this->assertFalse(AttributeHelper::hasAttributeCallback(MockClass::class, DummySmartAttribute::class, fn($attr)=>$attr->bTrue()));
     }
 
@@ -70,6 +73,10 @@ final class AttributeHelperTest extends TestCase
         $this->assertTrue(AttributeHelper::hasAttribute(MockClass::class, 'FakeAttribute'), 'hasAttribute should accept attributes that do not resolve to classes');
 
         $this->assertTrue(AttributeHelper::hasAttribute(MockClass::class, DummyAttribute::class), 'hasAttribute should return true when item has attribute class');
+
+        $this->assertTrue(AttributeHelper::hasAttribute(MockClass::class, DummyParentAttribute::class), 'hasAttribute should match child attributes');
+
+        $this->assertFalse(AttributeHelper::hasAttribute(MockClass::class, DummyParentAttribute::class, false), 'hasAttribute should not match child attributes when match children is false');
 
         $this->assertTrue(AttributeHelper::hasAttribute('dummyFunction', DummyAttribute::class), 'hasAttribute should work on functions');
 
@@ -96,6 +103,10 @@ final class AttributeHelperTest extends TestCase
     {
         $this->assertTrue(AttributeHelper::hasOneOfTheseAttributes(new MockClass(), [DummyAttribute::class]), "hasOneOfTheseAttributes should detect attribute presence when using instantiated objects");
 
+        $this->assertTrue(AttributeHelper::hasOneOfTheseAttributes(new MockClass(), [DummyParentAttribute::class]), "hasOneOfTheseAttributes default behavior should match attribute children when parent class provided");
+
+        $this->assertFalse(AttributeHelper::hasOneOfTheseAttributes(new MockClass(), [DummyParentAttribute::class], false), "hasOneOfTheseAttributes should NOT match attribute children when match children flag is false");
+
         $this->assertTrue(AttributeHelper::hasOneOfTheseAttributes(new MockClass(), ['FakeAttribute']), "hasOneOfTheseAttributes should detect presence of attributes that do not resolve to classes");
 
         $this->assertTrue(AttributeHelper::hasOneOfTheseAttributes(MockClass::class, [DummyAttribute::class]), "hasOneOfTheseAttributes should detect attribute presence when using qualified class names");
@@ -103,8 +114,6 @@ final class AttributeHelperTest extends TestCase
         $this->assertTrue(AttributeHelper::hasOneOfTheseAttributes(MockClass::class, [DummyAttribute::class, 'invalid name string', AnotherDummyAttribute::class]), "hasOneOfTheseAttributes should skip invalid attribute class names");
 
         $this->assertFalse(AttributeHelper::hasOneOfTheseAttributes(MockClass::class, [ThirdDummyAttribute::class]), "hasOneOfTheseAttributes should return false on no match");
-
-        $this->assertFalse(AttributeHelper::hasOneOfTheseAttributes('bad data', [null]), "hasOneOfTheseAttributes should not match attributes that don't apply");
 
         $this->assertFalse(AttributeHelper::hasOneOfTheseAttributes('bad data', [DummyAttribute::class]), "hasOneOfTheseAttributes should return false when class argument is invalid");
 
@@ -117,6 +126,10 @@ final class AttributeHelperTest extends TestCase
     {
         $this->assertTrue(AttributeHelper::hasAllOfTheseAttributes(new MockClass(), [DummyAttribute::class, AnotherDummyAttribute::class]), "hasAllOfTheseAttributes should return true when class has all attributes in list");
 
+        $this->assertTrue(AttributeHelper::hasAllOfTheseAttributes(new MockClass(), [DummyParentAttribute::class, AnotherDummyAttribute::class]), "hasAllOfTheseAttributes should match attribute children by default");
+
+        $this->assertFalse(AttributeHelper::hasAllOfTheseAttributes(new MockClass(), [DummyParentAttribute::class, AnotherDummyAttribute::class], false), "hasAllOfTheseAttributes should not match attribute children when flag is false");
+
         $this->assertFalse(AttributeHelper::hasAllOfTheseAttributes(new MockClass(), [DummyAttribute::class, ThirdDummyAttribute::class]), "hasAllOfTheseAttributes should return false when argument list contains attributes class does not have");
 
         $this->assertFalse(AttributeHelper::hasAllOfTheseAttributes(null, [DummyAttribute::class, AnotherDummyAttribute::class]), "hasAllOfTheseAttributes should return false when class argument is invalid");
@@ -127,6 +140,10 @@ final class AttributeHelperTest extends TestCase
     public function testDoesNotHaveTheseAttributes()
     {
         $this->assertFalse(AttributeHelper::doesNotHaveTheseAttributes(new MockClass(), [DummyAttribute::class]), "classDoesNotHaveAttributes should return false when target attribute present");
+
+        $this->assertFalse(AttributeHelper::doesNotHaveTheseAttributes(new MockClass(), [DummyParentAttribute::class]), "classDoesNotHaveAttributes should match child attributes by default");
+
+        $this->assertTrue(AttributeHelper::doesNotHaveTheseAttributes(new MockClass(), [DummyParentAttribute::class], false), "classDoesNotHaveAttributes should not match child attributes when flag is false");
 
         $this->assertFalse(AttributeHelper::doesNotHaveTheseAttributes(new MockClass(), [DummyAttribute::class, AnotherDummyAttribute::class]), "classDoesNotHaveAttributes should return false when target attributes present");
 
@@ -163,6 +180,10 @@ final class AttributeHelperTest extends TestCase
     {
         $this->assertEquals(['foo', 'bar', 'baz'], AttributeHelper::getClassMethodsWithAttributes(MockClass::class, [DummyAttribute::class]));
 
+        $this->assertEquals(['foo', 'bar', 'baz'], AttributeHelper::getClassMethodsWithAttributes(MockClass::class, [DummyParentAttribute::class]), 'getClassMethodsWithAttributes should match attribute children by default');
+
+        $this->assertEquals([], AttributeHelper::getClassMethodsWithAttributes(MockClass::class, [DummyParentAttribute::class], false), 'getClassMethodsWithAttributes should not match attribute children when flag is false');
+
         $this->assertEquals(['bar', 'baz'], AttributeHelper::getClassMethodsWithAttributes(MockClass::class, [AnotherDummyAttribute::class]));
 
         $this->assertEquals([], AttributeHelper::getClassMethodsWithAttributes(MockClass::class, ['bad data']));
@@ -173,9 +194,14 @@ final class AttributeHelperTest extends TestCase
 
     public function testCallClassMethodsWithAttributes()
     {
-        $MockClass = new MockClass();
         $methodArgs = ['val_a', 'val_b', 'val_c'];
+
+        $MockClass = new MockClass();
         $this->assertEquals(['foo'=>'foo_ret', 'bar'=>'bar_ret: val_a', 'baz'=>'baz_ret: val_a, val_b'], AttributeHelper::callClassMethodsWithAttributes($MockClass, [DummyAttribute::class], $methodArgs));
+        $this->assertEquals(['foo', 'bar', 'baz'], $MockClass->getMethodsCalled());
+
+        $MockClass = new MockClass();
+        $this->assertEquals(['foo'=>'foo_ret', 'bar'=>'bar_ret: val_a', 'baz'=>'baz_ret: val_a, val_b'], AttributeHelper::callClassMethodsWithAttributes($MockClass, [DummyParentAttribute::class], $methodArgs), 'callClassMethodsWithAttributes should match child attributes by default');
         $this->assertEquals(['foo', 'bar', 'baz'], $MockClass->getMethodsCalled());
     }
 

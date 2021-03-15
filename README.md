@@ -23,6 +23,8 @@ https://github.com/brimshot/AttributeHelper
 
 `AttributeHelper` is a static class. It cannot be instantiated and all methods are static.
 
+In the below methods, the *$item* provided as the first argument can be either a class, a class method, a class constant or a function. Class methods and constants are identified by passing in an array with the first value being the class name and the second value being the name of the method or constant i.e. `[$className, $methodName]`
+
 When passing in attribute names as arguments, names for attributes that resolve to classes should be given in form of a qualified class name i.e. 'namespace\path\to\MyAttribute' or *MyAttribute::class*
 
 Names for attributes that do not resolve to a class should be passed as simple strings.

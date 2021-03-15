@@ -11,21 +11,6 @@ include_once "AttributeHelper.php";
  */
 trait HasAttributes {
 
-    /*
-    private $__reflectorCache = null;
-
-    final private function reflectorFactory($item) : \ReflectionClass
-    {
-        if($item == $this) {
-            if (is_null($this->__reflectorCache))
-                $this->__reflectorCache = new \ReflectionClass($this);
-
-            return $this->__reflectorCache;
-        }
-
-    }
-    */
-
     // ~ Get
 
     final public function getAttributes() : array
@@ -48,7 +33,7 @@ trait HasAttributes {
         return AttributeHelper::getAttributeInstancesCallback($this, $callback);
     }
 
-    final public function getMethodsWithAttributes(array $attributes) : array
+    final public function getMethodsWithAttributes(array $attributes, bool $matchAttributeChildren = true) : array
     {
         return AttributeHelper::getClassMethodsWithAttributes($this, $attributes);
     }
@@ -56,7 +41,7 @@ trait HasAttributes {
 
     // ~ Has
 
-    final public function hasAttribute(string $attribute) : bool
+    final public function hasAttribute(string $attribute, bool $matchAttributeChildren = true) : bool
     {
         return AttributeHelper::hasAttribute($this, $attribute);
     }
@@ -66,38 +51,38 @@ trait HasAttributes {
         return AttributeHelper::hasAttributeCallback($this, $attribute, $callback);
     }
 
-    final public function hasOneOfTheseAttributes(array $attributes) : bool
+    final public function hasOneOfTheseAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
     {
-        return AttributeHelper::hasOneOfTheseAttributes($this, $attributes);
+        return AttributeHelper::hasOneOfTheseAttributes($this, $attributes, $matchAttributeChildren);
     }
 
-    final public function hasAllOfTheseAttributes(array $attributes) : bool
+    final public function hasAllOfTheseAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
     {
-        return AttributeHelper::hasAllOfTheseAttributes($this, $attributes);
+        return AttributeHelper::hasAllOfTheseAttributes($this, $attributes, $matchAttributeChildren);
     }
 
-    final public function hasExactlyTheseAttributes(array $attributes) : bool
+    final public function hasExactlyTheseAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
     {
         return AttributeHelper::hasExactlyTheseAttributes($this, $attributes);
     }
 
-    final public function doesNotHaveTheseAttributes(array $attributes) : bool
+    final public function doesNotHaveTheseAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
     {
-        return AttributeHelper::doesNotHaveTheseAttributes($this, $attributes);
+        return AttributeHelper::doesNotHaveTheseAttributes($this, $attributes, $matchAttributeChildren);
     }
 
-    final public function hasMethodsWithAttributes(array $attributes) : bool
+    final public function hasMethodsWithAttributes(array $attributes, bool $matchAttributeChildren = true) : bool
     {
-        return AttributeHelper::classHasMethodsWithAttributes($this, $attributes);
+        return AttributeHelper::classHasMethodsWithAttributes($this, $attributes, $matchAttributeChildren);
     }
 
 
 
     // ~ Call
 
-    final public function callMethodsWithAttributes(array $attributes, array $methodArgs = array()) : array
+    final public function callMethodsWithAttributes(array $attributes, array $methodArgs = array(), bool $matchAttributeChildren = true) : array
     {
-        return AttributeHelper::callClassMethodsWithAttributes($this, $attributes, $methodArgs);
+        return AttributeHelper::callClassMethodsWithAttributes($this, $attributes, $methodArgs, $matchAttributeChildren);
     }
 
 }
