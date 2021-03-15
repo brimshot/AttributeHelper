@@ -2,7 +2,6 @@
     "name": "brimshot/attributehelper",
     "description": "A utility for working with attributes in PHP",
     "type": "library",
-    "version": "0.1",
     "license": "MIT",
     "authors": [
         {
