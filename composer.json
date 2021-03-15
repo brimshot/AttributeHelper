@@ -3,6 +3,7 @@
     "description": "A utility for working with attributes in PHP",
     "type": "library",
     "license": "MIT",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Chris Brim",
